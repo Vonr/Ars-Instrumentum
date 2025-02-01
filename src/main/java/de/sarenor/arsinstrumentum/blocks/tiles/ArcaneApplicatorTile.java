@@ -46,12 +46,10 @@ public class ArcaneApplicatorTile extends ModdedTile implements ITickable, Conta
 
     @Override
     public void saveAdditional(@NotNull CompoundTag tag, HolderLookup.@NotNull Provider registries) {
-        super.saveAdditional(tag,registries);
+        super.saveAdditional(tag, registries);
         var stack = getStack();
         if (stack != null && !stack.isEmpty()) {
-            CompoundTag reagentTag = new CompoundTag();
-            stack.save(registries, reagentTag);
-            tag.put("itemStack", reagentTag);
+            tag.put("itemStack", stack.save(registries));
         }
     }
 
@@ -117,6 +115,13 @@ public class ArcaneApplicatorTile extends ModdedTile implements ITickable, Conta
 
     public void setStack(ItemStack stack) {
         this.stack = stack;
+        if (level != null && !level.isClientSide) {
+            if (!stack.isEmpty()) {
+                this.getPersistentData().put("itemStack", stack.save(level.registryAccess()));
+            } else {
+                this.getPersistentData().remove("itemStack");
+            }
+        }
         updateBlock();
     }
 

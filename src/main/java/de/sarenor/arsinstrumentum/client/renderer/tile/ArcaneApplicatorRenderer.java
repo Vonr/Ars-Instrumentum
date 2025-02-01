@@ -5,6 +5,7 @@ import com.hollingsworth.arsnouveau.client.renderer.item.GenericItemBlockRendere
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
+import de.sarenor.arsinstrumentum.blocks.ArcaneApplicator;
 import de.sarenor.arsinstrumentum.blocks.tiles.ArcaneApplicatorTile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -30,16 +31,17 @@ public class ArcaneApplicatorRenderer extends GeoBlockRenderer<ArcaneApplicatorT
     @Override
     public void actuallyRender(PoseStack poseStack, ArcaneApplicatorTile animatable, BakedGeoModel model, RenderType renderType, MultiBufferSource bufferSource, VertexConsumer buffer, boolean isReRender, float partialTick, int packedLight, int packedOverlay, int colour) {
         super.actuallyRender(poseStack, animatable, model, renderType, bufferSource, buffer, isReRender, partialTick, packedLight, packedOverlay, colour);
-        double x = animatable.getBlockPos().getX();
-        double y = animatable.getBlockPos().getY();
-        double z = animatable.getBlockPos().getZ();
-
-        if (animatable.getStack() == null || animatable.getStack().isEmpty())
+        if (animatable.getStack() == null || animatable.getStack().isEmpty()) {
             return;
+        }
 
-        poseStack.mulPose(Axis.YP.rotationDegrees((partialTick + (float) ClientInfo.ticksInGame) * 3f));
+        poseStack.pushPose();
+        var facing = animatable.getBlockState().getValue(ArcaneApplicator.FACING).getNormal();
+        poseStack.translate(-facing.getX() * 0.31, 0.9, -facing.getZ() * 0.31);
+        poseStack.mulPose(Axis.XP.rotationDegrees(facing.getZ() * 67));
+        poseStack.mulPose(Axis.ZP.rotationDegrees(facing.getX() * 67));
         Minecraft.getInstance().getItemRenderer().renderStatic(animatable.getStack(),
-                ItemDisplayContext.FIXED,
+                ItemDisplayContext.GROUND,
                 packedLight,
                 packedOverlay,
                 poseStack,
